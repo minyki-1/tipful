@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import Home from './Pages/Home';
-import Search from './Pages/Search'
 import Write from './Pages/Write'
 import { Route,Switch } from 'react-router-dom';
 
@@ -18,7 +17,6 @@ function Main() {
     <Container>
       <Switch>
         <Route path="/write" component={Write} />
-        <Route path="/search" component={Search} />
         <Route path="/" component={Home} />
       </Switch>
     </Container>

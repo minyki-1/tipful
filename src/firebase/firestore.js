@@ -9,7 +9,7 @@ export function getDate(overTime = 0) { // 년(2)/월(2)/일(2)/시(2)/분(2)/�
 }
 
 async function getDataByQuery(query,storageName) {
-  const sStorage = JSON.parse(sessionStorage.getItem(storageName));
+  const sStorage = storageName ? JSON.parse(sessionStorage.getItem(storageName)) : false;
   if(sStorage && sStorage[0] > getDate()){
     sStorage.shift();
     return sStorage
@@ -31,20 +31,61 @@ async function getDataByQuery(query,storageName) {
         }
         dataArray.push({...doc.data(),id:doc.id,bookmark:bookmark,like:like,likeCount:data.like.length,bookmarkCount:data.bookmark.length});
       })
-      dataArray.unshift(getDate(400)) // 데이터 리프레시 주기 400( 40초 )
+      dataArray.unshift(getDate(300)) // 데이터 리프레시 주기 300( 30초 )
     }).catch(err=>{
       alert('게시물 불러오기 실패\n' + err);
     })
-    sessionStorage.setItem(storageName,JSON.stringify(dataArray))
+    if(sStorage){
+      sessionStorage.setItem(storageName,JSON.stringify(dataArray))
+    }
     dataArray.shift();
     return dataArray
   }
+  return false
 }
 
 export function getPopularData() {
-  const query = db.collection('post').get();
+  const query = db.collection('post').orderBy("rank", "desc").limit(8).get();
 
   return getDataByQuery(query,'popular')
+}
+
+export function getRecentData() {
+  const query = db.collection('post').orderBy("date", "desc").limit(8).get();
+  
+  return getDataByQuery(query,'recent')
+}
+
+export async function getBookmarkData() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if(user){
+    const query = db.collection('post').where("bookmark", "array-contains", user.uid).limit(8).get();
+    return getDataByQuery(query,'bookmark')
+  }
+}
+
+export function getSearchData(keyword) {
+  if(keyword != ''){
+    let keywordArray = [];
+    keyword.split(' ').forEach(text=>{
+      text.split(',').forEach(text=>{
+        if(text != '' && text != ' '){
+          keywordArray.push(text)
+        }
+      })
+    })
+    const query = db.collection('post').where("title", "array-contains-any",keywordArray).limit(8).get();
+    return getDataByQuery(query)
+  }
+}
+
+export function getWriterData() {
+  const user = getUser();
+  if(user){
+    const query = db.collection('post').where("writer", "==", user.uid).limit(8).get();
+    return getDataByQuery(query,'writer')
+  }
+  return false
 }
 
 export async function addLike(isLike,docId) {
@@ -132,8 +173,8 @@ export async function addBookmark(isBookmark,docId) {
               alert('이미 북마크 함')
             }else{
               bookmarkData.push(user.uid);
-              console.log(bookmarkData,likeData)
               transaction.update(query, { bookmark: bookmarkData,rank:(bookmarkData.length + 1) * (likeData.length + 1) })
+              let isEditBookmark = false
               for (var key in sessionStorage) {
                 let sStorage = JSON.parse(sessionStorage.getItem(key))
                 if(sStorage && typeof sStorage == 'object'){
@@ -142,6 +183,13 @@ export async function addBookmark(isBookmark,docId) {
                       sStorage[i].bookmark = true;
                       sStorage[i].bookmarkCount = sStorage[i].bookmarkCount + 1;
                       sessionStorage.setItem(key,JSON.stringify(sStorage))
+                      if(!isEditBookmark){
+                        isEditBookmark = true
+                        const bookmarkStorage = JSON.parse(sessionStorage.getItem('bookmark'))
+                        console.log(sStorage[i])
+                        bookmarkStorage.push(sStorage[i])
+                        sessionStorage.setItem('bookmark',JSON.stringify(bookmarkStorage))
+                      }
                     }
                   })
                 }
@@ -163,6 +211,13 @@ export async function addBookmark(isBookmark,docId) {
                       sStorage[i].bookmarkCount = sStorage[i].bookmarkCount - 1;
                       sessionStorage.setItem(key,JSON.stringify(sStorage))
                     }
+                    const bookmarkStorage = JSON.parse(sessionStorage.getItem('bookmark'))
+                    bookmarkStorage.forEach((doc,i)=>{
+                      if(doc.id === docId){
+                        bookmarkStorage.splice(i,1)
+                        sessionStorage.setItem('bookmark',JSON.stringify(bookmarkStorage))
+                      }
+                    })
                   })
                 }
               }
@@ -187,6 +242,7 @@ function getUser() {
     const displayName = user.displayName;
     const photoURL = user.photoURL;
     const uid = user.uid;
+    localStorage.setItem('user',JSON.stringify({displayName,photoURL,uid}))
     return {displayName,photoURL,uid}
   }else{
     return null
@@ -203,7 +259,7 @@ export function signIn() {
       }).catch((error) => {
         alert('로그인 실패\n' + error.message)
       }).then((result) => {
-        const user = {photo:result.user.photoURL,name:result.user.displayName}
+        const user = {photoURL:result.user.photoURL,displayName:result.user.displayName,uid:result.user.uid}
         localStorage.setItem('user',JSON.stringify(user))
         alert('로그인 성공!')
         window.location.reload();

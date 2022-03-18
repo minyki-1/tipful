@@ -37,7 +37,7 @@ const ProfileModal = styled.span`
   position: absolute;
   width:152px;
   background-color: #222222;
-  padding: 8px;
+  padding: 4px;
   box-shadow: 0px 4px 20px 8px rgba(0, 0, 0, 0.25);
   right:20px;
   top:64px;
@@ -129,7 +129,7 @@ function Nav() {
       <div style={{display:'flex',alignItems:'center'}}>
         {
           user
-          ? <Profile onClick={()=>{setOnModal(!onModal)}} src={user.photo}/>
+          ? <Profile onClick={()=>{setOnModal(!onModal)}} src={user.photoURL}/>
           : <Svg_profile onClick={()=>{setOnModal(!onModal)}} width={32} height={32} style={{padding:4,margin:4,cursor:'pointer'}} />
         }
       </div>

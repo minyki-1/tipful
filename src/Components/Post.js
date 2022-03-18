@@ -140,7 +140,7 @@ function Post({data}) {
   const [isBookmark,setIsBookmark] = useState(data.bookmark)
 
   useEffect(()=>{
-    console.log(data)
+    // console.log(data)
 
     contentRef.current.childNodes.forEach((node)=>{   // 태그 인 스타일을 제거
       node.removeAttribute('style')
