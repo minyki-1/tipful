@@ -15,6 +15,7 @@ firebase.auth().onAuthStateChanged((user)=>{
     const userData = {photoURL:photoURL,displayName:displayName,uid:uid}
     localStorage.setItem('user',JSON.stringify(userData))
   }else{
+    sessionStorage.removeItem('bookmark')
     localStorage.removeItem('user')
   }
 });
