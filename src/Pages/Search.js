@@ -30,7 +30,7 @@ const SearchBar = styled.input`
   width:100%;
   border: none;
   outline: none;
-  border: 2px solid rgba(255,255,255,0.5);
+  border: 2px solid rgba(255,255,255,0.3);
   padding: 0.8rem;
   font-size: 15px;
 `
@@ -41,7 +41,7 @@ const SearchBtn = styled.button`
   padding: 0.8rem;
   border: none;
   outline: none;
-  border: 2px solid rgba(255,255,255,0.5);
+  border: 2px solid rgba(255,255,255,0.3);
   border-left: 0px;
 `
 

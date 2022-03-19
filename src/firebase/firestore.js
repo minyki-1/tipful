@@ -10,14 +10,13 @@ export function getDate(overTime = 0) { // 년(2)/월(2)/일(2)/시(2)/분(2)/�
 
 async function getDataByQuery(query,storageName) {
   const sStorage = storageName ? JSON.parse(sessionStorage.getItem(storageName)) : false;
-  console.log(sStorage,storageName)
   if(sStorage && sStorage[0] > getDate()){
     sStorage.shift();
     return sStorage
   }else{
     const dataArray = []
     await query.then((docs)=>{
-      const user = getUser();
+      const user = getCurrentUser();
       docs.forEach((doc)=>{
         const data = doc.data()
         let bookmark = false;
@@ -30,9 +29,14 @@ async function getDataByQuery(query,storageName) {
             like = true
           }
         }
-        dataArray.push({...doc.data(),id:doc.id,bookmark:bookmark,like:like,likeCount:data.like.length,bookmarkCount:data.bookmark.length});
+        let title = [];
+        data.title.forEach((txt)=>{
+          title.push(txt)
+          title.push(' ')
+        })
+        dataArray.push({...doc.data(),id:doc.id,title:title,bookmark:bookmark,like:like,likeCount:data.like.length,bookmarkCount:data.bookmark.length});
       })
-      dataArray.unshift(getDate(300)) // 데이터 리프레시 주기 300( 30초 )
+      dataArray.unshift(getDate(500)) // 데이터 리프레시 주기 500( 50초 )
     }).catch(err=>{
       alert('게시물 불러오기 실패\n' + err);
     })
@@ -42,18 +46,15 @@ async function getDataByQuery(query,storageName) {
     dataArray.shift();
     return dataArray
   }
-  return false
 }
 
 export function getPopularData() {
   const query = db.collection('post').orderBy("rank", "desc").limit(8).get();
-
   return getDataByQuery(query,'popular')
 }
 
 export function getRecentData() {
   const query = db.collection('post').orderBy("date", "desc").limit(8).get();
-  
   return getDataByQuery(query,'recent')
 }
 
@@ -80,17 +81,16 @@ export function getSearchData(keyword) {
   }
 }
 
-export function getWriterData() {
-  const user = getUser();
+export function getMyPostData() {
+  const user = JSON.parse(localStorage.getItem('user'));
   if(user){
     const query = db.collection('post').where("writer", "==", user.uid).limit(8).get();
-    return getDataByQuery(query,'writer')
+    return getDataByQuery(query,'mypost')
   }
-  return false
 }
 
 export async function editLike(isLike,docId) {
-  const user = getUser();
+  const user = getCurrentUser();
   const likeDelay = sessionStorage.getItem('likeDelay');
   if(user){
     if(likeDelay < getDate()){
@@ -156,7 +156,7 @@ export async function editLike(isLike,docId) {
 }
 
 export async function editBookmark(isBookmark,docId) {
-  const user = getUser();
+  const user = getCurrentUser();
   const bookmarkDelay = sessionStorage.getItem('bookmarkDelay');
   if(user){
     if(bookmarkDelay < getDate()){
@@ -235,21 +235,49 @@ export async function editBookmark(isBookmark,docId) {
   return false
 }
 
-function getUser() {
+function getCurrentUser() {
   const user = firebase.auth().currentUser;
   if (user !== null && user !== undefined) {
     const displayName = user.displayName;
     const photoURL = user.photoURL;
     const uid = user.uid;
-    localStorage.setItem('user',JSON.stringify({displayName,photoURL,uid}))
     return {displayName,photoURL,uid}
   }else{
     return null
   }
 }
 
+export async function getUserData(uid) {
+  const userStorage = JSON.parse(sessionStorage.getItem('user'))
+  if(userStorage){
+    let user;
+    let isIn = false
+    userStorage.forEach((doc,i)=>{
+      if(doc.id === uid){
+        user = userStorage[i]
+        isIn = true
+      }
+    })
+    if(!isIn){
+      await db.collection('user').doc(uid).get().then((doc)=>{
+        user = doc.data()
+        sessionStorage.setItem('user',JSON.stringify([...userStorage,{...doc.data(),id:doc.id}]))
+      })
+      return user
+    }
+    return user
+  }else{
+    let user;
+    await db.collection('user').doc(uid).get().then((doc)=>{
+      user = doc.data()
+      sessionStorage.setItem('user',JSON.stringify([{...doc.data(),id:doc.id}]))
+    })
+    return user
+  }
+}
+
 export function signIn() {
-  const user = getUser();
+  const user = getCurrentUser();
   if(user === null){
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .then(() => {
@@ -258,12 +286,19 @@ export function signIn() {
       }).catch((error) => {
         alert('로그인 실패\n' + error.message)
       }).then((result) => {
-        const user = {photoURL:result.user.photoURL,displayName:result.user.displayName,uid:result.user.uid}
-        localStorage.setItem('user',JSON.stringify(user))
-        alert('로그인 성공!')
-        window.location.reload();
+        const displayName = result.user.displayName;
+        const photoURL = result.user.photoURL;
+        const uid = result.user.uid;
+        const userData = {photoURL:photoURL,displayName:displayName,uid:uid}
+        db.collection('user').doc(uid).set(userData).then(()=>{
+          localStorage.setItem('user',JSON.stringify(userData))
+          alert('로그인 성공!')
+          window.location.reload();
+        }).catch((err)=>{
+          alert('사용자 정보 저장 실패' + err)
+        })
       }).catch((error) => {
-        alert('지속 저장 설정 실패\n' + error.message)
+        alert('사용자 정보 저장 실패\n' + error.message)
       });
   }else{
     alert('이미 로그인 했습니다.')
@@ -271,24 +306,38 @@ export function signIn() {
 }
 
 export function signOut() {
-  const user = getUser();
+  const user = getCurrentUser();
   if(user){
     if(window.confirm('로그아웃 하겠습니까?')){
       firebase.auth().signOut().then(() => {
-        localStorage.removeItem('user')
         alert('로그아웃완료');
         window.location.reload();
       }).catch((error) => {
-        var errorMessage = error.message;
-        alert(errorMessage);
+        alert('로그아웃 실패\n' + error.message);
       });
     }
   }else{
-    alert('로그인되어 있지 않습니다');
+    alert('로그인되어 있지 않습니다.');
   }
 }
 
 
 export function postTip(title,content) {
-  
+  const user = getCurrentUser();
+  if(user){
+    if(title && content && title !== '' && content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
+      const date = getDate()
+      const postData = {title:title,content:content,bookmark:[],like:[],date:date,rank:1,writer:user.uid}
+      db.collection('post').add(postData).then(()=>{
+        alert('포스트 성공!');
+        window.location.href = window.location.origin;
+      }).catch((err)=>{
+        alert('포스트 실패\n' + err);
+      })
+    }else{
+      alert('제목과 내용을 작성해주세요.');
+    }
+  }else{
+    alert('로그인 해야합니다.');
+  }
 }

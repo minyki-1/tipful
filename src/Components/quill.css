@@ -84,20 +84,20 @@
 .ql-editor h4,
 .ql-editor h5,
 .ql-editor h6 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   color: rgb(241, 241, 241);
   margin-top: 0.6rem;
   font-family: 400;
 }
 .ql-snow .ql-editor p span {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 .ql-snow .ql-editor h1 {
-  font-size: 1.875rem;
+  font-size: 2rem;
   font-weight: 400;
 }
 .ql-snow .ql-editor h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 400;
 }
 .ql-snow.ql-toolbar button {
@@ -181,14 +181,7 @@
 .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {
   stroke: rgb(236, 236, 236);
 }
-.ql-snow .ql-editor blockquote {
-  border-left: 4px solid #10e6a6;
-  margin-bottom: 5px;
-  margin-top: 5px;
-  padding: 1.5rem;
-  padding-left: 2rem;
-  background-color: #1e1e1e;
-}
+
 @media screen and (max-width: 760px) {
   .container {
     padding: 1.2rem;
@@ -218,18 +211,18 @@
   .ql-editor h4,
   .ql-editor h5,
   .ql-editor h6 {
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-top: 0.45rem;
     color: rgb(241, 241, 241);
   }
   .ql-snow .ql-editor h1 {
-    font-size: 1.40625rem;
+    font-size: 1.4rem;
   }
   .ql-snow .ql-editor h2 {
-    font-size: 1.125rem; /*  x1.25 */
+    font-size: 1.2rem; /*  x1.25 */
   }
   .ql-snow .ql-editor p span {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: rgb(241, 241, 241);
   }
   .ql-snow.ql-toolbar button {
@@ -244,9 +237,5 @@
   .ql-toolbar.ql-snow {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
-  }
-  .ql-snow .ql-editor blockquote {
-    padding: 0.95rem;
-    padding-left: 1.3rem;
   }
 }

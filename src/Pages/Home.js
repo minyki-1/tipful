@@ -6,6 +6,7 @@ import Recent from './Recent'
 import Popular from './Popular'
 import Bookmark from './Bookmark'
 import Search from './Search'
+import Error404 from './Error404'
 
 const Container = styled.div`
   width:100%;
@@ -33,7 +34,7 @@ function Home() {
           <Route path="/recent" component={Recent} />
           <Route path="/bookmark" component={Bookmark} />
           <Route path="/search" component={Search} />
-          <Route path="/">404 Not Found</Route>
+          <Route path="/" component={Error404} />
         </Switch>
       </RouterContainer>
     </Container>

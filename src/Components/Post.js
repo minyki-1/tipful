@@ -8,14 +8,15 @@ import {ReactComponent as Svg_arrow_up} from '../svg/arrow_up.svg'
 import {ReactComponent as Svg_heart} from '../svg/heart.svg'
 import {ReactComponent as Svg_heart_fill} from '../svg/heart_fill.svg'
 import {ReactComponent as Svg_menu_colum} from '../svg/menu_colum.svg'
+import {ReactComponent as Svg_report} from '../svg/report.svg'
 // import {ReactComponent as Svg_menu_row} from '../svg/menu_row.svg'
 
-import {editLike,editBookmark,getDate} from '../firebase/firestore'
+import {editLike,editBookmark,getDate,getUserData} from '../firebase/firestore'
 
 const Container = styled.div`
   width:calc(100% - 3.8rem);
   min-height:calc((100vw - 3.8rem) / 16 * 9);
-  height:${(props)=>props.spread ? '100%' : 'calc((100vw - 3.8rem) / 16 * 9)'};
+  height:${(props)=>props.isSpread ? '100%' : 'calc((100vw - 3.8rem) / 16 * 9)'};
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -29,7 +30,7 @@ const Container = styled.div`
     margin-bottom: 0px;
     width: calc(50% - 3.8rem);
     min-height:calc((100vw - 3.8rem) / 2 / 16 * 9);
-    height:${(props)=>props.spread ? '100%' : 'calc((100vw - 3.8rem) / 2 / 16 * 9)'};
+    height:${(props)=>props.isSpread ? '100%' : 'calc((100vw - 3.8rem) / 2 / 16 * 9)'};
   }
   *{
     background-color: #1E1E1E;
@@ -55,12 +56,13 @@ const CenterIcon = styled.div`
 `
 const Content = styled.div`
   background-color: initial;
-  height:80%;
-  width: 100%;
+  height:calc(100% - 6px);
+  width: calc(100% - 6px);
+  padding: 3px;
   overflow:hidden;
-  margin-top: 6px;
+  margin-top: 4px;
   h1{
-    font-size: 18px;
+    font-size: 17.5px;
     font-weight:400;
     strong{
       font-weight:bold;
@@ -70,7 +72,7 @@ const Content = styled.div`
     }
   }
   h2{
-    font-size: 16px;
+    font-size: 16.25px;
     font-weight:400;
     strong{
       font-weight:bold;
@@ -80,7 +82,7 @@ const Content = styled.div`
     }
   }
   p{
-    font-size: 14px;
+    font-size: 15px;
     font-weight:400;
     strong{
       font-weight:bold;
@@ -90,9 +92,11 @@ const Content = styled.div`
     }
   }
   *{
-    font-size: 14px;
+    font-size: 15px;
     margin-top:0px;
     margin-bottom:0px;
+    color: ${(props)=>props.isSpread ? "#ececec" : '#B4B4B4'};
+    padding-bottom:${(props)=>props.isSpread ? "2px" : '0px'};
     a{
       color: #3ea6ff;
     }
@@ -100,9 +104,12 @@ const Content = styled.div`
 `
 const Title = styled.div`
   width:100%;
+  height:auto;
+  display: flex;
   overflow: hidden;
   text-overflow:ellipsis;
-  font-size:20px;
+  font-size:18px;
+  padding-bottom: 2px;
 `
 const InformBar = styled.div`
   height:20px;
@@ -113,35 +120,63 @@ const InformBar = styled.div`
   align-items:center;
   border-top: 2px solid #2D2D2D;
 `
-const ProfileImg = styled.img`
-  width:20px;
-  height:20px;
-  border-radius: 100px;
-`
-const ProfileText = styled.div`
-  font-size:13px;
-  margin-left:4px;
-  margin-right:12px;
+const DateText = styled.div`
+  font-size:12.25px;
+  margin-right:4px;
   color:#D0D0D0;
 `
 const LikeText = styled.div`
-  font-size: 13px;
+  font-size: 12.25px;
   color:#D0D0D0;
-  margin-left:12px;
+`
+const Modal = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width:120px;
+  background-color: #111111;
+  padding: 4px;
+  box-shadow: 0px 4px 20px 8px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  right:25px;
+  margin-top: 110px;
+  border-radius: 4px;
+  z-index: 10;
+  *{
+    background-color: #111111;
+    text-decoration: none;
+  }
+`
+const ModalLine = styled.div`
+  display:flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  margin: 2px;
+`
+const ModalText = styled.div`
+  font-size: 14.5px;
+  margin-left: 6px;
+`
+const ProfileImg = styled.img`
+  width:24px;
+  height:24px;
+  border-radius: 100px;
+  padding: 2px;
+  cursor: pointer;
 `
 
 function Post({data}) {
-  const contentValue = sessionStorage.getItem('text')
   const icon = { fill:'#EEEEEE', width:19, height:19, style:{padding:'4px',cursor:'pointer'}}
-  const [spread,setSpread] = useState(false);
+  const [isSpread,setIsSpread] = useState(false);
   const postRef = useRef()
   const contentRef = useRef()
   const [isLike,setIsLike] = useState(data.like)
   const [isBookmark,setIsBookmark] = useState(data.bookmark)
+  const [isModal, setIsModal] = useState(false);
+  const [writer,setWriter] = useState(false);
 
   useEffect(()=>{
-    // console.log(data)
-
     contentRef.current.childNodes.forEach((node)=>{   // 태그 인 스타일을 제거
       node.removeAttribute('style')
       node.childNodes.forEach((elem)=>{
@@ -169,19 +204,18 @@ function Post({data}) {
   }
 
   useEffect(()=>{
-    if(spread == true){   //페이지를 펼칠때 그 위치로 스크롤 이동
+    if(isSpread == true){   //페이지를 펼칠때 그 위치로 스크롤 이동
       const top = postRef.current.offsetTop;
       window.scrollTo({top:top - 20, behavior:'smooth'});
     }
-  },[spread])
+  },[isSpread])
 
   return (
-    <Container spread={spread} ref={postRef}>
-
+    <Container isSpread={isSpread} ref={postRef}>
       <Center>
         <CenterText>
-          <Title>Title</Title>
-          <Content ref={contentRef} dangerouslySetInnerHTML={ {__html: Dompurify.sanitize(contentValue)} }/>
+          <Title>{data.title}</Title>
+          <Content isSpread={isSpread} ref={contentRef} dangerouslySetInnerHTML={ {__html: Dompurify.sanitize(data.content)} }/>
         </CenterText>
         <CenterIcon>
           {
@@ -196,15 +230,28 @@ function Post({data}) {
             : <Svg_heart onClick={()=>{likeOnClick()}} {...icon} />
           }
           <span style={{marginTop:12}} />
-          <Svg_menu_colum {...icon} />  
+          <Svg_menu_colum onClick={()=>{
+            setIsModal(!isModal); 
+            getUserData(data.writer).then(result=>{setWriter(result)})
+          }} {...icon} />
         </CenterIcon>
+        {
+          isModal && writer &&
+          <Modal>
+            <ModalLine>
+              <ProfileImg src={writer.photoURL} />
+              <ModalText>{writer.displayName}</ModalText>
+            </ModalLine>
+            <ModalLine>
+              <Svg_report {...icon} />
+              <ModalText>신고하기</ModalText>
+            </ModalLine>
+          </Modal>
+        }
       </Center>
 
       <InformBar>
         <div style={{display:'flex',alignItems:'center'}}>
-          <ProfileImg src="https://yt3.ggpht.com/yti/APfAmoHjR07qQc8HPLecMV7kPHu5zReL5cRHyDEklKf7Uw=s88-c-k-c0x00ffffff-no-rj-mo"/>
-          <ProfileText>CWIN77</ProfileText>
-          <span style={{width:4,height:4,boderRadius:10,backgroundColor:'#D0D0D0'}}/>
           <LikeText>
             좋아요 {
               data.like
@@ -212,11 +259,13 @@ function Post({data}) {
               : isLike ? data.likeCount + 1 : data.likeCount
             }개
           </LikeText>
+          <span style={{width:4,height:4,borderRadius:10,margin:10,backgroundColor:'#D0D0D0'}}/>
+          <DateText>20{String(data.date).slice(0,2)}년 {String(data.date).slice(2,4)}월 {String(data.date).slice(4,6)}일</DateText>
         </div>
         {
-          spread
-          ? <Svg_arrow_up onClick={()=>{setSpread(false)}} {...icon} />
-          : <Svg_arrow_down onClick={()=>{setSpread(true)}} {...icon} />
+          isSpread
+          ? <Svg_arrow_up onClick={()=>{setIsSpread(false)}} {...icon} />
+          : <Svg_arrow_down onClick={()=>{setIsSpread(true)}} {...icon} />
         }
       </InformBar>
       

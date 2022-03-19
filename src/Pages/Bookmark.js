@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 
 const Container = styled.div`
   width:100%;
+  height:100%;
   display: flex;
   flex-wrap: wrap;
 `
@@ -19,10 +20,20 @@ const Stuff = styled.div`
     margin: 1rem;
   }
 `
+const Notice = styled.div`
+  width:100%;
+  height:70vh;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  opacity: 0.6;
+`
 
 function Bookmark() {
-  const sStorage = JSON.parse(sessionStorage.getItem('bookmark'))
-  const [dataResult,setDataResult] = useState(sStorage && sStorage[0] > getDate() ? "noDelay" : false)
+  const bookmarkStorage = JSON.parse(sessionStorage.getItem('bookmark'))
+  const user = JSON.parse(localStorage.getItem('user'))
+  const [dataResult,setDataResult] = useState(bookmarkStorage && bookmarkStorage[0] > getDate() ? "noDelay" : false)
   useEffect(()=>{
     getBookmarkData().then((result)=>{setDataResult(result)})
   },[])
@@ -30,12 +41,16 @@ function Bookmark() {
   return (
     <Container>
       {
-        dataResult && dataResult != 'noDelay'
-        ? dataResult.map((data,key)=>{
-          return <Post key={key} data={data} />
-        })
-        : dataResult != 'noDelay' && 
-        <><PostReady/><PostReady/><PostReady/></>
+        user
+        ? dataResult && dataResult != 'noDelay'
+          ? dataResult.length > 0
+            ? dataResult.map((data,key)=>{
+              return <Post key={key} data={data} />
+            })
+            : <Notice>북마크한 게시물이 없습니다.</Notice>
+          : dataResult != 'noDelay' &&
+          <><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/></>
+        : <Notice>로그인 후 북마크가 가능합니다.</Notice>
       }
       {
         dataResult &&

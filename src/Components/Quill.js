@@ -39,10 +39,6 @@ function Quill() {
 
   const [value, setValue] = useState('')
 
-  useEffect(()=>{
-    console.log(value)
-  },[value])
-
   return (
     <div className='container'>
       <input className='title' placeholder='제목을 입력하세요'></input>

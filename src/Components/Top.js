@@ -6,9 +6,10 @@ import {ReactComponent as Svg_myTips} from '../svg/myTips.svg'
 import {ReactComponent as Svg_postPlus} from '../svg/postPlus.svg'
 import {ReactComponent as Svg_googleIcon} from '../svg/googleIcon.svg'
 import {ReactComponent as Svg_crossLine} from '../svg/crossLine.svg'
+import {ReactComponent as Svg_triangle_down} from '../svg/triangle_down.svg'
 
 import { signIn,signOut } from '../firebase/firestore'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 const Container = styled.div`
   width:calc(100% - 2rem);
@@ -28,20 +29,23 @@ const Profile = styled.img`
   border-radius: 100px;
   width: 36px;
   height:36px;
-  margin: 4px;
-  margin-left: 8px;
+  margin-right: 0px;
   padding: 4px;
+  margin: 4px;
+  margin-right: 0px;
+  padding-right:0px;
   cursor: pointer;
 `
 const ProfileModal = styled.span`
   position: absolute;
-  width:152px;
+  min-width:152px;
   background-color: #222222;
   padding: 4px;
   box-shadow: 0px 4px 20px 8px rgba(0, 0, 0, 0.25);
   right:20px;
   top:64px;
   border-radius: 4px;
+  z-index: 10;
   *{
     background-color: #222222;
     text-decoration: none;
@@ -68,6 +72,7 @@ const AuthModalBackgorund = styled.div`
   display:flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
 `
 const AuthModal = styled.div`
   display: flex;
@@ -129,20 +134,22 @@ function Nav() {
       <div style={{display:'flex',alignItems:'center'}}>
         {
           user
-          ? <Profile onClick={()=>{setOnModal(!onModal)}} src={user.photoURL}/>
+          ? <span onClick={()=>{setOnModal(!onModal)}} style={{display:'flex',alignItems:'center',cursor:'pointer'}}><Profile src={user.photoURL}/><Svg_triangle_down {...svg} /></span>
           : <Svg_profile onClick={()=>{setOnModal(!onModal)}} width={32} height={32} style={{padding:4,margin:4,cursor:'pointer'}} />
         }
       </div>
       {
         onModal ?
           user
-          ? <ProfileModal>
-              <ModalLine onClick={()=>{}}>
-                <Svg_myTips {...svg} />
-                <ModalText>내 팁 보기</ModalText>
-              </ModalLine>
+          ? <ProfileModal onClick={()=>{setOnModal(!onModal); window.location.reload()}}>
+              <Link to="/mytip">
+                <ModalLine>
+                  <Svg_myTips {...svg} />
+                  <ModalText>내 팁 보기</ModalText>
+                </ModalLine>
+              </Link>
               <Link to="/write">
-                <ModalLine onClick={()=>{}}>
+                <ModalLine>
                   <Svg_postPlus {...svg} />
                   <ModalText>새 팁 작성</ModalText>
                 </ModalLine>
@@ -156,10 +163,10 @@ function Nav() {
               <AuthModal>
                 <AuthModalSignIn>
                   <AuthModalSignInText>로그인</AuthModalSignInText>
-                    <AuthModalSignInBtn onClick={()=>{signIn()}}>
-                      <Svg_googleIcon {...svg} />
-                    </AuthModalSignInBtn>
-                  <AuthModalSignInText/>
+                  <AuthModalSignInBtn onClick={()=>{signIn()}}>
+                    <Svg_googleIcon {...svg} />
+                  </AuthModalSignInBtn>
+                <AuthModalSignInText/>
                 </AuthModalSignIn>
                 <AuthModalExplane>
                   <Svg_crossLine onClick={()=>{setOnModal(!onModal)}} style={{padding:8}} width={18} height={18} fill={'#7C7C7C'} />

@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import Home from './Pages/Home';
 import Write from './Pages/Write'
+import mytip from './Pages/Mytip'
 import { Route,Switch } from 'react-router-dom';
 
 const Container = styled.div`
@@ -17,6 +18,7 @@ function Main() {
     <Container>
       <Switch>
         <Route path="/write" component={Write} />
+        <Route path="/mytip" component={mytip} />
         <Route path="/" component={Home} />
       </Switch>
     </Container>
