@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import Post from './Post'
+import Post from '../Components/Post'
 import {getSearchData} from '../firebase/firestore'
 import { useEffect, useState } from 'react'
 import {ReactComponent as Svg_search} from '../svg/search.svg'

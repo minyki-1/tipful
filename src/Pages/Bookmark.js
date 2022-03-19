@@ -1,7 +1,7 @@
 import styled from 'styled-components'
-import Post from './Post'
-import PostReady from './PostReady'
-import {getPopularData,getDate} from '../firebase/firestore'
+import Post from '../Components/Post'
+import PostReady from '../Components/PostReady'
+import {getBookmarkData,getDate} from '../firebase/firestore'
 import { useEffect, useState } from 'react'
 
 const Container = styled.div`
@@ -20,11 +20,11 @@ const Stuff = styled.div`
   }
 `
 
-function Popular() {
-  const sStorage = JSON.parse(sessionStorage.getItem('popular'))
+function Bookmark() {
+  const sStorage = JSON.parse(sessionStorage.getItem('bookmark'))
   const [dataResult,setDataResult] = useState(sStorage && sStorage[0] > getDate() ? "noDelay" : false)
   useEffect(()=>{
-    getPopularData().then((result)=>{setDataResult(result)})
+    getBookmarkData().then((result)=>{setDataResult(result)})
   },[])
 
   return (
@@ -46,4 +46,4 @@ function Popular() {
   );
 }
 
-export default Popular;
+export default Bookmark;

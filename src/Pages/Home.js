@@ -2,10 +2,10 @@ import styled from 'styled-components'
 import Top from '../Components/Top'
 import Navbar from '../Components/Navbar'
 import { Route,Switch } from 'react-router-dom';
-import Recent from '../Components/Recent'
-import Popular from '../Components/Popular'
-import Bookmark from '../Components/Bookmark'
-import Search from '../Components/Search'
+import Recent from './Recent'
+import Popular from './Popular'
+import Bookmark from './Bookmark'
+import Search from './Search'
 
 const Container = styled.div`
   width:100%;

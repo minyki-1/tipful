@@ -10,7 +10,7 @@ import {ReactComponent as Svg_heart_fill} from '../svg/heart_fill.svg'
 import {ReactComponent as Svg_menu_colum} from '../svg/menu_colum.svg'
 // import {ReactComponent as Svg_menu_row} from '../svg/menu_row.svg'
 
-import {addLike,addBookmark,getDate} from '../firebase/firestore'
+import {editLike,editBookmark,getDate} from '../firebase/firestore'
 
 const Container = styled.div`
   width:calc(100% - 3.8rem);
@@ -154,7 +154,7 @@ function Post({data}) {
 
   const bookmarkOnClick = () => {
     if(sessionStorage.getItem('bookmarkDelay') < getDate()){
-      addBookmark(isBookmark,data.id).then((result)=>{
+      editBookmark(isBookmark,data.id).then((result)=>{
         if(result) setIsBookmark(!isBookmark)
       })
     }
@@ -162,7 +162,7 @@ function Post({data}) {
 
   const likeOnClick = () => {
     if(sessionStorage.getItem('likeDelay') < getDate()){
-      addLike(isLike,data.id).then((result)=>{
+      editLike(isLike,data.id).then((result)=>{
         if(result) setIsLike(!isLike)
       })
     }

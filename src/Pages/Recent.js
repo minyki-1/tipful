@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import Post from './Post'
-import PostReady from './PostReady'
+import Post from '../Components/Post'
+import PostReady from '../Components/PostReady'
 import {getRecentData,getDate} from '../firebase/firestore'
 import { useEffect, useState } from 'react'
 

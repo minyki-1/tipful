@@ -10,6 +10,7 @@ export function getDate(overTime = 0) { // 년(2)/월(2)/일(2)/시(2)/분(2)/�
 
 async function getDataByQuery(query,storageName) {
   const sStorage = storageName ? JSON.parse(sessionStorage.getItem(storageName)) : false;
+  console.log(sStorage,storageName)
   if(sStorage && sStorage[0] > getDate()){
     sStorage.shift();
     return sStorage
@@ -35,7 +36,7 @@ async function getDataByQuery(query,storageName) {
     }).catch(err=>{
       alert('게시물 불러오기 실패\n' + err);
     })
-    if(sStorage){
+    if(storageName){
       sessionStorage.setItem(storageName,JSON.stringify(dataArray))
     }
     dataArray.shift();
@@ -88,7 +89,7 @@ export function getWriterData() {
   return false
 }
 
-export async function addLike(isLike,docId) {
+export async function editLike(isLike,docId) {
   const user = getUser();
   const likeDelay = sessionStorage.getItem('likeDelay');
   if(user){
@@ -154,7 +155,7 @@ export async function addLike(isLike,docId) {
   return false
 }
 
-export async function addBookmark(isBookmark,docId) {
+export async function editBookmark(isBookmark,docId) {
   const user = getUser();
   const bookmarkDelay = sessionStorage.getItem('bookmarkDelay');
   if(user){
@@ -186,7 +187,6 @@ export async function addBookmark(isBookmark,docId) {
                       if(!isEditBookmark){
                         isEditBookmark = true
                         const bookmarkStorage = JSON.parse(sessionStorage.getItem('bookmark'))
-                        console.log(sStorage[i])
                         bookmarkStorage.push(sStorage[i])
                         sessionStorage.setItem('bookmark',JSON.stringify(bookmarkStorage))
                       }
@@ -229,7 +229,6 @@ export async function addBookmark(isBookmark,docId) {
         alert("북마크 실패\n" + err);
       });
     }
-    
   }else{
     alert('로그인 해야합니다.');
   }
@@ -287,4 +286,9 @@ export function signOut() {
   }else{
     alert('로그인되어 있지 않습니다');
   }
+}
+
+
+export function postTip(title,content) {
+  
 }
