@@ -64,7 +64,7 @@ const Content = styled.div`
   overflow:hidden;
   margin-top: 4px;
   h1{
-    font-size: 17.5px;
+    font-size: 18px;
     font-weight:400;
     strong{
       font-weight:bold;
@@ -74,7 +74,7 @@ const Content = styled.div`
     }
   }
   h2{
-    font-size: 16.25px;
+    font-size: 16px;
     font-weight:400;
     strong{
       font-weight:bold;
@@ -84,7 +84,7 @@ const Content = styled.div`
     }
   }
   p{
-    font-size: 15px;
+    font-size: 14px;
     font-weight:400;
     strong{
       font-weight:bold;
@@ -94,7 +94,7 @@ const Content = styled.div`
     }
   }
   *{
-    font-size: 15px;
+    font-size: 14px;
     margin-top:0px;
     margin-bottom:0px;
     color: ${(props)=>props.isSpread ? "#ececec" : '#B4B4B4'};
@@ -249,6 +249,7 @@ function Post({data}) {
               </ModalLine>
             }
             {
+              user &&
               user.uid == writer.id &&
               <Link to="/modify" onClick={()=>{sessionStorage.setItem('modify',JSON.stringify(data))}}>
                 <ModalLine>

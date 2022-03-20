@@ -19,8 +19,6 @@ firebase.auth().onAuthStateChanged((user)=>{
     localStorage.removeItem('user')
   }
 });
-sessionStorage.removeItem('user')
-
 
 ReactDOM.render(
   <React.StrictMode>

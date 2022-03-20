@@ -386,3 +386,7 @@ export function modifyTip(data,title,content) {
     alert('내 팁이 아닙니다.')
   }
 }
+
+export function deleteTip() {
+  
+}
