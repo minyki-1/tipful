@@ -67,7 +67,7 @@ const PostBtn = styled.button`
   cursor: pointer;
 `
 
-function Writer() {
+function Modify() {
   const formats = [
     'header',
     'bold', 'italic', 'underline', 'strike', 'blockquote',
@@ -114,10 +114,10 @@ function Writer() {
             }
           }}>나가기</OutBtnText>
         </OutBtn>
-        <PostBtn onClick={()=>{postTip(title,content)}}>포스트!</PostBtn>
+        <PostBtn onClick={()=>{postTip(title,content)}}>수정!</PostBtn>
       </NavBar>
     </div>
   )
 }
 
-export default Writer
+export default Modify

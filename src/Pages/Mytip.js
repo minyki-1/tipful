@@ -63,7 +63,7 @@ function Mytip() {
 
   return (
     <Container>
-      <OutBtn onClick={()=>{window.location.href = window.location.origin}}>
+      <OutBtn onClick={()=>{window.history.back();}}>
         <Svg_arrow_left width={16} height={16} fill="white" style={{marginRight:6}} />
         나가기
       </OutBtn>

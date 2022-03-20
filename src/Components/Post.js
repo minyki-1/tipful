@@ -9,9 +9,12 @@ import {ReactComponent as Svg_heart} from '../svg/heart.svg'
 import {ReactComponent as Svg_heart_fill} from '../svg/heart_fill.svg'
 import {ReactComponent as Svg_menu_colum} from '../svg/menu_colum.svg'
 import {ReactComponent as Svg_report} from '../svg/report.svg'
-// import {ReactComponent as Svg_menu_row} from '../svg/menu_row.svg'
+import {ReactComponent as Svg_postPlus} from '../svg/postPlus.svg'
 
-import {editLike,editBookmark,getDate,getUserData} from '../firebase/firestore'
+import {editLike,editBookmark,getDate,getUserData,modifyTip,getCurrentUser} from '../firebase/firestore'
+
+import Modify from '../Pages/Modify'
+import { Link } from 'react-router-dom'
 
 const Container = styled.div`
   width:calc(100% - 3.8rem);
@@ -151,7 +154,7 @@ const ModalLine = styled.div`
   display:flex;
   align-items: center;
   cursor: pointer;
-  padding: 8px;
+  padding: 6px;
   margin: 2px;
 `
 const ModalText = styled.div`
@@ -167,6 +170,7 @@ const ProfileImg = styled.img`
 `
 
 function Post({data}) {
+  const user = JSON.parse(localStorage.getItem('user'))
   const icon = { fill:'#EEEEEE', width:19, height:19, style:{padding:'4px',cursor:'pointer'}}
   const [isSpread,setIsSpread] = useState(false);
   const postRef = useRef()
@@ -175,6 +179,7 @@ function Post({data}) {
   const [isBookmark,setIsBookmark] = useState(data.bookmark)
   const [isModal, setIsModal] = useState(false);
   const [writer,setWriter] = useState(false);
+  const [isModify,setIsModify] = useState(false);
 
   useEffect(()=>{
     contentRef.current.childNodes.forEach((node)=>{   // 태그 인 스타일을 제거
@@ -236,12 +241,22 @@ function Post({data}) {
           }} {...icon} />
         </CenterIcon>
         {
-          isModal && writer &&
+          isModal &&
           <Modal>
-            <ModalLine>
-              <ProfileImg src={writer.photoURL} />
-              <ModalText>{writer.displayName}</ModalText>
-            </ModalLine>
+            {
+              writer &&
+              <ModalLine>
+                <ProfileImg src={writer.photoURL} />
+                <ModalText>{writer.displayName}</ModalText>
+              </ModalLine>
+            }
+            {
+              user.uid == writer.id &&
+              <ModalLine>
+                <Svg_postPlus {...icon} />
+                <ModalText>수정하기</ModalText>
+              </ModalLine>
+            }
             <ModalLine>
               <Svg_report {...icon} />
               <ModalText>신고하기</ModalText>

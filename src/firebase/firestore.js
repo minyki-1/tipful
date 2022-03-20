@@ -187,8 +187,10 @@ export async function editBookmark(isBookmark,docId) {
                       if(!isEditBookmark){
                         isEditBookmark = true
                         const bookmarkStorage = JSON.parse(sessionStorage.getItem('bookmark'))
-                        bookmarkStorage.push(sStorage[i])
-                        sessionStorage.setItem('bookmark',JSON.stringify(bookmarkStorage))
+                        if(bookmarkStorage){
+                          bookmarkStorage.push(sStorage[i])
+                          sessionStorage.setItem('bookmark',JSON.stringify(bookmarkStorage))
+                        }
                       }
                     }
                   })
@@ -212,12 +214,14 @@ export async function editBookmark(isBookmark,docId) {
                       sessionStorage.setItem(key,JSON.stringify(sStorage))
                     }
                     const bookmarkStorage = JSON.parse(sessionStorage.getItem('bookmark'))
-                    bookmarkStorage.forEach((doc,i)=>{
-                      if(doc.id === docId){
-                        bookmarkStorage.splice(i,1)
-                        sessionStorage.setItem('bookmark',JSON.stringify(bookmarkStorage))
-                      }
-                    })
+                    if(bookmarkStorage){
+                      bookmarkStorage.forEach((doc,i)=>{
+                        if(doc.id === docId){
+                          bookmarkStorage.splice(i,1)
+                          sessionStorage.setItem('bookmark',JSON.stringify(bookmarkStorage))
+                        }
+                      })
+                    }
                   })
                 }
               }
@@ -235,7 +239,7 @@ export async function editBookmark(isBookmark,docId) {
   return false
 }
 
-function getCurrentUser() {
+export function getCurrentUser() {
   const user = firebase.auth().currentUser;
   if (user !== null && user !== undefined) {
     const displayName = user.displayName;
@@ -247,33 +251,36 @@ function getCurrentUser() {
   }
 }
 
-export async function getUserData(uid) {
+export async function getUserData(uid = false) {
   const userStorage = JSON.parse(sessionStorage.getItem('user'))
-  if(userStorage){
-    let user;
-    let isIn = false
-    userStorage.forEach((doc,i)=>{
-      if(doc.id === uid){
-        user = userStorage[i]
-        isIn = true
+  if(uid){
+    if(userStorage){
+      let user;
+      let isIn = false
+      userStorage.forEach((doc,i)=>{
+        if(doc.id === uid){
+          user = userStorage[i]
+          isIn = true
+        }
+      })
+      if(!isIn){
+        await db.collection('user').doc(uid).get().then((doc)=>{
+          user = {...doc.data(),id:doc.id}
+          sessionStorage.setItem('user',JSON.stringify([...userStorage,user]))
+        })
+        return user
       }
-    })
-    if(!isIn){
+      return user
+    }else{
+      let user;
       await db.collection('user').doc(uid).get().then((doc)=>{
-        user = doc.data()
-        sessionStorage.setItem('user',JSON.stringify([...userStorage,{...doc.data(),id:doc.id}]))
+        user = {...doc.data(),id:doc.id}
+        sessionStorage.setItem('user',JSON.stringify([user]))
       })
       return user
     }
-    return user
-  }else{
-    let user;
-    await db.collection('user').doc(uid).get().then((doc)=>{
-      user = doc.data()
-      sessionStorage.setItem('user',JSON.stringify([{...doc.data(),id:doc.id}]))
-    })
-    return user
   }
+  return false
 }
 
 export function signIn() {
@@ -327,10 +334,18 @@ export function postTip(title,content) {
   if(user){
     if(title && content && title !== '' && content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
       const date = getDate()
-      const postData = {title:title,content:content,bookmark:[],like:[],date:date,rank:1,writer:user.uid}
+      let titleArray = [];
+      title.split(' ').forEach(text=>{
+        text.split(',').forEach(text=>{
+          if(text != '' && text != ' '){
+            titleArray.push(text)
+          }
+        })
+      })
+      const postData = {title:titleArray,content:content,bookmark:[],like:[],date:date,rank:1,writer:user.uid}
       db.collection('post').add(postData).then(()=>{
         alert('포스트 성공!');
-        window.location.href = window.location.origin;
+        window.history.back();
       }).catch((err)=>{
         alert('포스트 실패\n' + err);
       })
@@ -339,5 +354,19 @@ export function postTip(title,content) {
     }
   }else{
     alert('로그인 해야합니다.');
+  }
+}
+
+export function modifyTip(data,content,title) {
+  const user = getCurrentUser();
+  if(data.writer == user.uid){
+    db.collection('post').doc(data.id).update({content:content,title:title}).then(()=>{
+      alert('팁 수정 완료!');
+      window.history.back()
+    }).catch((err)=>{
+      alert('팁 수정 실패\n' + err)
+    })
+  }else{
+    alert('내 팁이 아닙니다.')
   }
 }
