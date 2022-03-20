@@ -10,8 +10,9 @@ import {ReactComponent as Svg_heart_fill} from '../svg/heart_fill.svg'
 import {ReactComponent as Svg_menu_colum} from '../svg/menu_colum.svg'
 import {ReactComponent as Svg_report} from '../svg/report.svg'
 import {ReactComponent as Svg_postPlus} from '../svg/postPlus.svg'
+import {ReactComponent as Svg_trash} from '../svg/trash.svg'
 
-import {editLike,editBookmark,getDate,getUserData,modifyTip,getCurrentUser} from '../firebase/firestore'
+import {editLike,editBookmark,getDate,getUserData,deleteTip} from '../firebase/firestore'
 
 import { Link } from 'react-router-dom'
 
@@ -106,11 +107,12 @@ const Content = styled.div`
 `
 const Title = styled.div`
   width:100%;
-  height:auto;
-  display: flex;
+  height:${(props)=>props.isSpread ? '100%' : '24px'};
   overflow: hidden;
   text-overflow:ellipsis;
+  white-space:${(props)=>props.isSpread ? 'normal' : 'nowrap'};
   font-size:18px;
+  line-height: 24px;
   padding-bottom: 2px;
 `
 const InformBar = styled.div`
@@ -217,7 +219,7 @@ function Post({data}) {
     <Container isSpread={isSpread} ref={postRef}>
       <Center>
         <CenterText>
-          <Title>{data.title.join(' ')}</Title>
+          <Title isSpread={isSpread}>{data.title.join(' ')}</Title>
           <Content isSpread={isSpread} ref={contentRef} dangerouslySetInnerHTML={ {__html: Dompurify.sanitize(data.content)} }/>
         </CenterText>
         <CenterIcon>
@@ -251,12 +253,18 @@ function Post({data}) {
             {
               user &&
               user.uid == writer.id &&
-              <Link to="/modify" onClick={()=>{sessionStorage.setItem('modify',JSON.stringify(data))}}>
-                <ModalLine>
-                  <Svg_postPlus {...icon} />
-                  <ModalText>수정하기</ModalText>
+              <>
+                <Link to="/modify" onClick={()=>{sessionStorage.setItem('modify',JSON.stringify(data))}}>
+                  <ModalLine>
+                    <Svg_postPlus {...icon} />
+                    <ModalText>수정하기</ModalText>
+                  </ModalLine>
+                </Link>
+                <ModalLine onClick={()=>{deleteTip(data.id,data.writer)}}>
+                  <Svg_trash {...icon} />
+                  <ModalText>삭제하기</ModalText>
                 </ModalLine>
-              </Link>
+              </>
             }
             <ModalLine>
               <Svg_report {...icon} />

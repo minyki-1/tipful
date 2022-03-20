@@ -116,7 +116,7 @@ function Modify() {
             }
           }}>나가기</OutBtnText>
         </OutBtn>
-        <PostBtn onClick={()=>{if(window.confirm('위와 같은 내용으로 수정하시겠습니까?')) modifyTip(modifyStorage,title,content)}}>수정!</PostBtn>
+        <PostBtn onClick={()=>{modifyTip(modifyStorage,title,content)}}>수정!</PostBtn>
       </NavBar>
     </div>
   )

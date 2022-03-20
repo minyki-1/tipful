@@ -353,40 +353,66 @@ export function postTip(title,content) {
 }
 
 export function modifyTip(data,title,content) {
-  const user = getCurrentUser();
-  if(data.writer == user.uid){
-    if(title && content && title !== '' && content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
-      let titleArray = [];
-      title.split(' ').forEach(text=>{
-        if(text != '' && text != ' '){
-          titleArray.push(text)
-        }
-      })
-      db.collection('post').doc(data.id).update({content:content,title:titleArray}).then(()=>{
+  if(window.confirm('위와 같은 내용으로 수정하시겠습니까?')) {
+    const user = getCurrentUser();
+    if(data.writer == user.uid){
+      if(title && content && title !== '' && content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
+        let titleArray = [];
+        title.split(' ').forEach(text=>{
+          if(text != '' && text != ' '){
+            titleArray.push(text)
+          }
+        })
+        db.collection('post').doc(data.id).update({content:content,title:titleArray}).then(()=>{
+          sessionStorage.removeItem('modify')
+          for (var key in sessionStorage) {
+            let sStorage = JSON.parse(sessionStorage.getItem(key))
+            if(sStorage && typeof sStorage == 'object'){
+              sStorage.forEach((doc,i)=>{
+                if(doc.id === data.id){
+                  sStorage[i].content = content;
+                  sStorage[i].title = titleArray;
+                  sessionStorage.setItem(key,JSON.stringify(sStorage))
+                }
+              })
+            }
+          }
+          alert('팁 수정 완료!');
+          window.history.back()
+        }).catch((err)=>{
+          alert('팁 수정 실패\n' + err)
+        })
+      }
+    }else{
+      alert('나의 팁이 아닙니다.')
+    }
+  }
+}
+
+export function deleteTip(id,writer) {
+  if(window.confirm('팁을 삭제하시겠습니까?')){
+    const user = getCurrentUser();
+    if(user.uid == writer && id){
+      db.collection('post').doc(id).delete().then(()=>{
         sessionStorage.removeItem('modify')
         for (var key in sessionStorage) {
           let sStorage = JSON.parse(sessionStorage.getItem(key))
           if(sStorage && typeof sStorage == 'object'){
             sStorage.forEach((doc,i)=>{
-              if(doc.id === data.id){
-                sStorage[i].content = content;
-                sStorage[i].title = titleArray;
+              if(doc.id === id){
+                sStorage.splice(i,1);
                 sessionStorage.setItem(key,JSON.stringify(sStorage))
               }
             })
           }
         }
-        alert('팁 수정 완료!');
-        window.history.back()
+        alert('팁 삭제 완료')
+        window.location.reload()
       }).catch((err)=>{
-        alert('팁 수정 실패\n' + err)
+        alert('팁 삭제 실패\n' + err)
       })
+    }else{
+      alert('나의 팁이 아닙니다.')
     }
-  }else{
-    alert('내 팁이 아닙니다.')
   }
-}
-
-export function deleteTip() {
-  
 }
