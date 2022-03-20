@@ -32,11 +32,10 @@ async function getDataByQuery(query,storageName) {
         let title = [];
         data.title.forEach((txt)=>{
           title.push(txt)
-          title.push(' ')
         })
         dataArray.push({...doc.data(),id:doc.id,title:title,bookmark:bookmark,like:like,likeCount:data.like.length,bookmarkCount:data.bookmark.length});
       })
-      dataArray.unshift(getDate(500)) // 데이터 리프레시 주기 500( 50초 )
+      dataArray.unshift(getDate(1400)) // 데이터 리프레시 주기 1400( 1분 40초 )
     }).catch(err=>{
       alert('게시물 불러오기 실패\n' + err);
     })
@@ -70,11 +69,9 @@ export function getSearchData(keyword) {
   if(keyword != ''){
     let keywordArray = [];
     keyword.split(' ').forEach(text=>{
-      text.split(',').forEach(text=>{
-        if(text != '' && text != ' '){
-          keywordArray.push(text)
-        }
-      })
+      if(text != '' && text != ' '){
+        keywordArray.push(text)
+      }
     })
     const query = db.collection('post').where("title", "array-contains-any",keywordArray).limit(8).get();
     return getDataByQuery(query)
@@ -336,11 +333,9 @@ export function postTip(title,content) {
       const date = getDate()
       let titleArray = [];
       title.split(' ').forEach(text=>{
-        text.split(',').forEach(text=>{
-          if(text != '' && text != ' '){
-            titleArray.push(text)
-          }
-        })
+        if(text != '' && text != ' '){
+          titleArray.push(text)
+        }
       })
       const postData = {title:titleArray,content:content,bookmark:[],like:[],date:date,rank:1,writer:user.uid}
       db.collection('post').add(postData).then(()=>{
@@ -357,15 +352,36 @@ export function postTip(title,content) {
   }
 }
 
-export function modifyTip(data,content,title) {
+export function modifyTip(data,title,content) {
   const user = getCurrentUser();
   if(data.writer == user.uid){
-    db.collection('post').doc(data.id).update({content:content,title:title}).then(()=>{
-      alert('팁 수정 완료!');
-      window.history.back()
-    }).catch((err)=>{
-      alert('팁 수정 실패\n' + err)
-    })
+    if(title && content && title !== '' && content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
+      let titleArray = [];
+      title.split(' ').forEach(text=>{
+        if(text != '' && text != ' '){
+          titleArray.push(text)
+        }
+      })
+      db.collection('post').doc(data.id).update({content:content,title:titleArray}).then(()=>{
+        sessionStorage.removeItem('modify')
+        for (var key in sessionStorage) {
+          let sStorage = JSON.parse(sessionStorage.getItem(key))
+          if(sStorage && typeof sStorage == 'object'){
+            sStorage.forEach((doc,i)=>{
+              if(doc.id === data.id){
+                sStorage[i].content = content;
+                sStorage[i].title = titleArray;
+                sessionStorage.setItem(key,JSON.stringify(sStorage))
+              }
+            })
+          }
+        }
+        alert('팁 수정 완료!');
+        window.history.back()
+      }).catch((err)=>{
+        alert('팁 수정 실패\n' + err)
+      })
+    }
   }else{
     alert('내 팁이 아닙니다.')
   }

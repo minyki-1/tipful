@@ -13,7 +13,6 @@ import {ReactComponent as Svg_postPlus} from '../svg/postPlus.svg'
 
 import {editLike,editBookmark,getDate,getUserData,modifyTip,getCurrentUser} from '../firebase/firestore'
 
-import Modify from '../Pages/Modify'
 import { Link } from 'react-router-dom'
 
 const Container = styled.div`
@@ -179,7 +178,6 @@ function Post({data}) {
   const [isBookmark,setIsBookmark] = useState(data.bookmark)
   const [isModal, setIsModal] = useState(false);
   const [writer,setWriter] = useState(false);
-  const [isModify,setIsModify] = useState(false);
 
   useEffect(()=>{
     contentRef.current.childNodes.forEach((node)=>{   // 태그 인 스타일을 제거
@@ -219,7 +217,7 @@ function Post({data}) {
     <Container isSpread={isSpread} ref={postRef}>
       <Center>
         <CenterText>
-          <Title>{data.title}</Title>
+          <Title>{data.title.join(' ')}</Title>
           <Content isSpread={isSpread} ref={contentRef} dangerouslySetInnerHTML={ {__html: Dompurify.sanitize(data.content)} }/>
         </CenterText>
         <CenterIcon>
@@ -252,10 +250,12 @@ function Post({data}) {
             }
             {
               user.uid == writer.id &&
-              <ModalLine>
-                <Svg_postPlus {...icon} />
-                <ModalText>수정하기</ModalText>
-              </ModalLine>
+              <Link to="/modify" onClick={()=>{sessionStorage.setItem('modify',JSON.stringify(data))}}>
+                <ModalLine>
+                  <Svg_postPlus {...icon} />
+                  <ModalText>수정하기</ModalText>
+                </ModalLine>
+              </Link>
             }
             <ModalLine>
               <Svg_report {...icon} />

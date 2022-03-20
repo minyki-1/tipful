@@ -5,7 +5,7 @@ import '../Components/quill.css';
 import styled from 'styled-components'
 
 import {ReactComponent as Svg_arrow_left} from '../svg/arrow_left.svg'
-import {postTip} from '../firebase/firestore'
+import {modifyTip} from '../firebase/firestore'
 
 const Placeholder = styled.div`
   position: absolute;
@@ -84,8 +84,9 @@ function Modify() {
     },
   }
 
-  const [content, setContent] = useState('')
-  const [title,setTitle] = useState('')
+  const modifyStorage = JSON.parse(sessionStorage.getItem('modify'))
+  const [content, setContent] = useState(modifyStorage.content)
+  const [title,setTitle] = useState(modifyStorage.title.join(' '))
 
   return (
     <div className='container'>
@@ -106,15 +107,16 @@ function Modify() {
           <Svg_arrow_left width={18} height={18} fill={'#ECECEC'} />
           <OutBtnText onClick={()=>{
             if(content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
-              if(window.confirm('페이지를 나가면 저장이 안됩니다.\n나가시겠습니까?')){
+              if(window.confirm('페이지를 나가면 수정이 취소됩니다.\n나가시겠습니까?')) {
                 window.history.back();
+                sessionStorage.removeItem('modify')
               }
             }else{
               window.history.back();
             }
           }}>나가기</OutBtnText>
         </OutBtn>
-        <PostBtn onClick={()=>{postTip(title,content)}}>수정!</PostBtn>
+        <PostBtn onClick={()=>{if(window.confirm('위와 같은 내용으로 수정하시겠습니까?')) modifyTip(modifyStorage,title,content)}}>수정!</PostBtn>
       </NavBar>
     </div>
   )
