@@ -62,6 +62,7 @@ const Content = styled.div`
   height:calc(100% - 6px);
   width: calc(100% - 6px);
   padding: 3px;
+  /* text-overflow:none; */
   overflow:hidden;
   margin-top: 4px;
   h1{
@@ -219,7 +220,7 @@ function Post({data}) {
     <Container isSpread={isSpread} ref={postRef}>
       <Center>
         <CenterText>
-          <Title isSpread={isSpread}>{data.title.join(' ')}</Title>
+          <Title isSpread={isSpread}>{data.title.join('')}</Title>
           <Content isSpread={isSpread} ref={contentRef} dangerouslySetInnerHTML={ {__html: Dompurify.sanitize(data.content)} }/>
         </CenterText>
         <CenterIcon>

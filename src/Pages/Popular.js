@@ -35,7 +35,7 @@ function Popular() {
           return <Post key={key} data={data} />
         })
         : dataResult != 'noDelay' && 
-        <><PostReady/><PostReady/><PostReady/></>
+        <><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/><PostReady/></>
       }
       {
         dataResult &&

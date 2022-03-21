@@ -15,9 +15,10 @@ const Placeholder = styled.div`
   font-size: 1.4rem;
   user-select:none;
   color:#808080;
+  top: 206px;
 
   @media only screen and (max-width: 760px) {
-    top: 132px;
+    top: 133px;
     left: 18px;
     font-size: 1.1rem;
   }
@@ -40,12 +41,17 @@ const OutBtn = styled.button`
   align-items: center;
   margin:8px;
   margin-left: 20px;
-  padding: 4px;
-  padding-left: 2px;
-  padding-right: 2px;
+  padding: 16px;
+  padding-left: 8px;
+  padding-right: 8px;
   outline: none;
   border: none;
   cursor: pointer;
+  @media only screen and (max-width: 760px) {
+    padding: 4px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
 `
 const OutBtnText = styled.div`
   font-size: 16px;
@@ -65,6 +71,20 @@ const PostBtn = styled.button`
   outline: none;
   border: none;
   cursor: pointer;
+`
+const Title = styled.input`
+  font-size: 2.5rem;
+  background-color: #121212;
+  color: rgb(241, 241, 241);
+  width: 98%;
+  margin-bottom: 0.4rem;
+  outline: none;
+  border: none;
+
+  @media only screen and (max-width: 760px) {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
 `
 
 function Writer() {
@@ -89,7 +109,7 @@ function Writer() {
 
   return (
     <div className='container'>
-      <input className='title' placeholder='제목을 입력하세요' value={title} onChange={(e)=>{setTitle(e.target.value)}}></input>
+      <Title type='text' placeholder='제목을 입력하세요' value={title} onChange={(e)=>{setTitle(e.target.value)}}/>
       {
         content == '' || content == '<p><br></p>' || content == '<h1><br></h1>' || content == '<h2><br></h2>'
         ? <Placeholder>작성</Placeholder>

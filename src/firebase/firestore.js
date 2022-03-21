@@ -60,28 +60,24 @@ export function getRecentData() {
 export async function getBookmarkData() {
   const user = JSON.parse(localStorage.getItem('user'));
   if(user){
-    const query = db.collection('post').where("bookmark", "array-contains", user.uid).limit(8).get();
+    const query = db.collection('post').where("bookmark", "array-contains", user.uid).get();
     return getDataByQuery(query,'bookmark')
   }
 }
 
-export function getSearchData(keyword) {
-  if(keyword != ''){
-    let keywordArray = [];
-    keyword.split(' ').forEach(text=>{
-      if(text != '' && text != ' '){
-        keywordArray.push(text)
-      }
-    })
-    const query = db.collection('post').where("title", "array-contains-any",keywordArray).limit(8).get();
+export async function getSearchData(keyword) {
+  if(keyword != '' && keyword != ' '){
+    const titleArray = getTitleKeyword(keyword)
+    const query = db.collection('post').where("title", "array-contains-any",titleArray).limit(20).get();
     return getDataByQuery(query)
   }
+  return false
 }
 
 export function getMyPostData() {
   const user = JSON.parse(localStorage.getItem('user'));
   if(user){
-    const query = db.collection('post').where("writer", "==", user.uid).limit(8).get();
+    const query = db.collection('post').where("writer", "==", user.uid).get();
     return getDataByQuery(query,'mypost')
   }
 }
@@ -331,14 +327,10 @@ export function postTip(title,content) {
   if(user){
     if(title && content && title !== '' && content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
       const date = getDate()
-      let titleArray = [];
-      title.split(' ').forEach(text=>{
-        if(text != '' && text != ' '){
-          titleArray.push(text)
-        }
-      })
+      const titleArray = getTitleKeyword(title)
       const postData = {title:titleArray,content:content,bookmark:[],like:[],date:date,rank:1,writer:user.uid}
       db.collection('post').add(postData).then(()=>{
+        sessionStorage.clear() // TODO: 세션스토리지에 데이터를 넣는 방식으로 바꾸기
         alert('포스트 성공!');
         window.history.back();
       }).catch((err)=>{
@@ -357,12 +349,7 @@ export function modifyTip(data,title,content) {
     const user = getCurrentUser();
     if(data.writer == user.uid){
       if(title && content && title !== '' && content != '' && content != '<p><br></p>' && content != '<h1><br></h1>' && content != '<h2><br></h2>'){
-        let titleArray = [];
-        title.split(' ').forEach(text=>{
-          if(text != '' && text != ' '){
-            titleArray.push(text)
-          }
-        })
+        const titleArray = getTitleKeyword(title)
         db.collection('post').doc(data.id).update({content:content,title:titleArray}).then(()=>{
           sessionStorage.removeItem('modify')
           for (var key in sessionStorage) {
@@ -415,4 +402,32 @@ export function deleteTip(id,writer) {
       alert('나의 팁이 아닙니다.')
     }
   }
+}
+
+function isKor(ch) {
+  const c = ch.charCodeAt(0);
+  if( 0x1100<=c && c<=0x11FF ) return true;
+  if( 0x3130<=c && c<=0x318F ) return true;
+  if( 0xAC00<=c && c<=0xD7A3 ) return true;
+  return false;
+}
+
+
+function getTitleKeyword(title) {
+  let text = '';
+  const titleArray = []
+  title.split('').forEach((txt,i)=>{
+    if(txt != ' '){
+      text += txt
+      if(title.length - 1 != i && isKor(title.split('')[i + 1]) != isKor(txt)){
+        titleArray.push(text)
+        text = ''
+      }else if(title.length - 1 == i){
+        titleArray.push(text)
+      }
+    }else{
+      titleArray.push(' ')
+    }
+  })
+  return titleArray
 }
