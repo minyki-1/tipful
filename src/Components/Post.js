@@ -220,7 +220,7 @@ function Post({data}) {
     <Container isSpread={isSpread} ref={postRef}>
       <Center>
         <CenterText>
-          <Title isSpread={isSpread}>{data.title.join('')}</Title>
+          <Title isSpread={isSpread}>{data.title.join(' ')}</Title>
           <Content isSpread={isSpread} ref={contentRef} dangerouslySetInnerHTML={ {__html: Dompurify.sanitize(data.content)} }/>
         </CenterText>
         <CenterIcon>

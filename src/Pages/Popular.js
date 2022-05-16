@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import Post from '../Components/Post'
 import PostReady from '../Components/PostReady'
 import {getPopularData,getDate} from '../firebase/firestore'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const Container = styled.div`
   width:100%;
@@ -23,6 +23,7 @@ const Stuff = styled.div`
 function Popular() {
   const sStorage = JSON.parse(sessionStorage.getItem('popular'))
   const [dataResult,setDataResult] = useState(sStorage && sStorage[0] > getDate() ? "noDelay" : false)
+  
   useEffect(()=>{
     getPopularData().then((result)=>{setDataResult(result)})
   },[])

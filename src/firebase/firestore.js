@@ -330,7 +330,7 @@ export function postTip(title,content) {
       const titleArray = getTitleKeyword(title)
       const postData = {title:titleArray,content:content,bookmark:[],like:[],date:date,rank:1,writer:user.uid}
       db.collection('post').add(postData).then(()=>{
-        sessionStorage.clear() // TODO: 세션스토리지에 데이터를 넣는 방식으로 바꾸기
+        sessionStorage.clear()
         alert('포스트 성공!');
         window.history.back();
       }).catch((err)=>{
